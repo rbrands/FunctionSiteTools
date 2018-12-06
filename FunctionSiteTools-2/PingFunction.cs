@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace FunctionSiteTools_2
+namespace FunctionSiteTools
 {
-    public static class Function1
+    public static class PingFunction
     {
-        [FunctionName("Function1")]
+        [FunctionName("PingFunction")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
