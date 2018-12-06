@@ -10,9 +10,16 @@ using Newtonsoft.Json;
 
 namespace FunctionSiteTools
 {
-    public static class PingFunction
+    public static class Ping
     {
-        [FunctionName("PingFunction")]
+        /// <summary>
+        /// Sample function that works as "Ping" of Azure Functions.
+        /// A argument "name" can be part of query string or part of the body and will be shown as response.
+        /// </summary>
+        /// <param name="req"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
+        [FunctionName("Ping")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
