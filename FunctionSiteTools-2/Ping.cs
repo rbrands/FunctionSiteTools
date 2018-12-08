@@ -15,6 +15,7 @@ namespace FunctionSiteTools
         /// <summary>
         /// Sample function that works as "Ping" of Azure Functions.
         /// A argument "name" can be part of query string or part of the body and will be shown as response.
+        /// Use function key to call.
         /// </summary>
         /// <param name="req"></param>
         /// <param name="log"></param>
