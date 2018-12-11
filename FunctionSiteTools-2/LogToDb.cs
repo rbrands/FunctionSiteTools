@@ -11,6 +11,12 @@ namespace FunctionSiteTools
 {
     public static class LogToDb
     {
+        /// <summary>
+        /// Saves log message to CosmosDB
+        /// </summary>
+        /// <param name="myQueueItem"></param>
+        /// <param name="logItem"></param>
+        /// <param name="log"></param>
         [FunctionName("LogToDb")]
         public static void Run([QueueTrigger("logging", Connection = "AzureWebJobsStorage")]string myQueueItem,
             [CosmosDB(
