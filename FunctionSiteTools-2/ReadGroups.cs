@@ -43,8 +43,8 @@ namespace FunctionSiteTools
                 dynamic response = await $"https://graph.microsoft.com/v1.0/users/{userPrincipalName}/memberOf"
                                .WithOAuthBearerToken(accessToken)
                                .GetJsonAsync();
-                var groups = response.value;
-                return new JsonResult(groups);
+                
+                return new JsonResult(response);
             }
             catch (Exception ex)
             {
