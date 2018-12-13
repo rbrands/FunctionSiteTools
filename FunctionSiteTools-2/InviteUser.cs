@@ -30,7 +30,8 @@ namespace FunctionSiteTools
                 // Call Graph API
                 dynamic response = await $"https://graph.microsoft.com/v1.0/invitations"
                                .WithOAuthBearerToken(accessToken)
-                               .PostJsonAsync(invitedUser);
+                               .PostJsonAsync(invitedUser)
+                               .ReceiveJson();
                 return new JsonResult(response);
             }
             catch (Exception ex)
