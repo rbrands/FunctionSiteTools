@@ -32,7 +32,7 @@ namespace FunctionSiteTools
                 dynamic response = await $"https://graph.microsoft.com/v1.0/users"
                                .WithOAuthBearerToken(accessToken)
                                .PostJsonAsync(newUser);
-                return new JsonResult(response.value);
+                return new JsonResult(response);
             }
             catch (Exception ex)
             {

@@ -31,7 +31,7 @@ namespace FunctionSiteTools
                 dynamic response = await $"https://graph.microsoft.com/v1.0/invitations"
                                .WithOAuthBearerToken(accessToken)
                                .PostJsonAsync(invitedUser);
-                return new JsonResult(response.value);
+                return new JsonResult(response);
             }
             catch (Exception ex)
             {
