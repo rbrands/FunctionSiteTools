@@ -1,18 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <AzureFunctionsVersion>v2</AzureFunctionsVersion>
+    <TargetFramework>net6.0</TargetFramework>
+    <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <RootNamespace>FunctionSiteTools</RootNamespace>
     <AssemblyName>FunctionSiteTools</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Flurl" Version="2.8.1" />
-    <PackageReference Include="Flurl.Http" Version="2.4.1" />
-    <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.2.0-preview" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.CosmosDB" Version="3.0.3" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.SendGrid" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.3" />
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.24" />
+    <PackageReference Include="Flurl" Version="3.0.6" />
+    <PackageReference Include="Flurl.Http" Version="3.2.4" />
+    <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.6.2" />
+    <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.33" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.CosmosDB" Version="3.0.10" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.SendGrid" Version="3.0.2" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="5.0.1" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.1" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
