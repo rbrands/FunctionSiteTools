@@ -2,28 +2,53 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Microsoft.Azure.Services.AppAuthentication;
 using Flurl.Http;
+using Microsoft.Azure.Functions.Worker;
 
 namespace FunctionSiteTools
 {
-    public static class ReadGroupMembers
+    public class ReadGroupMembers
     {
+        private readonly ILogger _logger;
+        public ReadGroupMembers(ILogger<TranslateText> logger)
+        {
+            _logger = logger;
+        }
+        public class Group
+        {
+            public string id { get; set; }
+        }
+
+        public class Member
+        {
+            public string id { get; set; }
+            public string displayName { get; set; }
+        }
+
+        public class GroupResponse
+        {
+            public List<Group> value { get; set; }
+        }
+
+        public class MemberResponse
+        {
+            public List<Member> value { get; set; }
+        }
+
         /// <summary>
-        /// Gets all memebers of given group. 
+        /// Gets all members of given group. 
         /// </summary>
         /// <param name="req"></param>
         /// <param name="log"></param>
         /// <returns></returns>
-        [FunctionName("ReadGroupMembers")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, ILogger log)
+        [Function("ReadGroupMembers")]
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req)
         {
-            log.LogInformation("C# HTTP trigger ReadGroupMembers function processed a request.");
+            _logger.LogInformation("C# HTTP trigger ReadGroupMembers function processed a request.");
 
             string groupId = req.Query["id"];
             string displayName = req.Query["displayName"];
@@ -38,9 +63,9 @@ namespace FunctionSiteTools
                 try
                 {
                     // Get group id from displayName
-                    dynamic groupResponse = await $"https://graph.microsoft.com/v1.0/groups/?$filter=displayName eq '{displayName}'"
+                    var groupResponse = await $"https://graph.microsoft.com/v1.0/groups/?$filter=displayName eq '{displayName}'"
                                         .WithOAuthBearerToken(accessToken)
-                                        .GetJsonAsync();
+                                        .GetJsonAsync<GroupResponse>();
                     var groups = groupResponse.value;
                     if (groups.Count == 0)
                     {
@@ -48,24 +73,36 @@ namespace FunctionSiteTools
                     }
                     groupId = groups[0].id;
                 }
+                catch (FlurlHttpException ex)
+                {
+                    var errorResponse = await ex.GetResponseStringAsync();
+                    _logger.LogError($"Request failed: {ex.Message}, Response: {errorResponse}");
+                    return new BadRequestObjectResult($"Request failed: {ex.Message}, Response: {errorResponse}");
+                }
                 catch (Exception ex)
                 {
-                    log.LogError(ex.Message);
+                    _logger.LogError(ex.Message);
                     return new BadRequestObjectResult(ex.Message);
                 }
             }
 
             try
             {
-                dynamic response = await $"https://graph.microsoft.com/v1.0/groups/{groupId}/members"
+                var response = await $"https://graph.microsoft.com/v1.0/groups/{groupId}/members"
                                .WithOAuthBearerToken(accessToken)
-                               .GetJsonAsync();
+                               .GetJsonAsync<MemberResponse>();
                 var members = response.value;
                 return new JsonResult(members);
             }
+            catch (FlurlHttpException ex)
+            {
+                var errorResponse = await ex.GetResponseStringAsync();
+                _logger.LogError($"Request failed: {ex.Message}, Response: {errorResponse}");
+                return new BadRequestObjectResult($"Request failed: {ex.Message}, Response: {errorResponse}");
+            }
             catch (Exception ex)
             {
-                log.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return new BadRequestObjectResult(ex.Message);
             }
         }

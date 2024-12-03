@@ -2,16 +2,20 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Microsoft.Azure.Functions.Worker;
 
 namespace FunctionSiteTools
 {
-    public static class Ping
+    public class Ping
     {
+        private readonly ILogger _logger;
+        public Ping(ILogger<Ping> logger)
+        {
+            _logger = logger;
+        }
         /// <summary>
         /// Sample function that works as "Ping" of Azure Functions.
         /// A argument "name" can be part of query string or part of the body and will be shown as response.
@@ -20,12 +24,11 @@ namespace FunctionSiteTools
         /// <param name="req"></param>
         /// <param name="log"></param>
         /// <returns></returns>
-        [FunctionName("Ping")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
+        [Function("Ping")]
+        public async Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            _logger.LogInformation("C# HTTP trigger function processed 'Ping''.");
 
             string name = req.Query["name"];
 
@@ -34,7 +37,7 @@ namespace FunctionSiteTools
             name = name ?? data?.name;
 
             return name != null
-                ? (ActionResult)new OkObjectResult($"Hello, {name} Version 2019-02-20")
+                ? (ActionResult)new OkObjectResult($"Hello, {name} Version 2024-12-03")
                 : new BadRequestObjectResult("Please pass a name on the query string or in the request body");
         }
     }
