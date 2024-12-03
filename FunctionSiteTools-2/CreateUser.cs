@@ -2,42 +2,57 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Microsoft.Azure.Services.AppAuthentication;
 using Flurl.Http;
+using Microsoft.Azure.Functions.Worker;
 
 namespace FunctionSiteTools
 {
-    public static class CreateUser
+    public class CreateUser
     {
-        [FunctionName("CreateUser")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
-            ILogger log)
+        private readonly ILogger _logger;
+
+        public CreateUser(ILogger<CreateUser> logger)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            _logger = logger;
+        }
+
+        [Function("CreateUser")]
+        public async Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req)
+        {
+            _logger.LogInformation("C# HTTP trigger function processed a request.");
 
             var azureServiceTokenProvider = new AzureServiceTokenProvider();
             string accessToken = await azureServiceTokenProvider.GetAccessTokenAsync("https://graph.microsoft.com/");
 
             try
             {
-                string requestBody = new StreamReader(req.Body).ReadToEnd();
+                string requestBody;
+                using (var reader = new StreamReader(req.Body))
+                {
+                    requestBody = await reader.ReadToEndAsync();
+                }
                 AzureAdUser newUser = JsonConvert.DeserializeObject<AzureAdUser>(requestBody);
                 // Call Graph API
-                dynamic response = await $"https://graph.microsoft.com/v1.0/users"
+                var response = await $"https://graph.microsoft.com/v1.0/users"
                                .WithOAuthBearerToken(accessToken)
                                .PostJsonAsync(newUser)
-                               .ReceiveJson();
+                               .ReceiveJson<AzureAdUser>();
                 return new JsonResult(response);
+            }
+            catch (FlurlHttpException ex)
+            {
+                var errorResponse = await ex.GetResponseStringAsync();
+                _logger.LogError($"Request failed: {ex.Message}, Response: {errorResponse}");
+                return new BadRequestObjectResult($"Request failed: {ex.Message}, Response: {errorResponse}");
             }
             catch (Exception ex)
             {
-                log.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return new BadRequestObjectResult(ex.Message);
             }
         }
